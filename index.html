@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Cameras Map Barcelona</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #fff;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%; 
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #865656;
+      padding: 10px;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #ecf0f1;
+      font-size: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    header h1 i {
+      margin-right: 10px;
+      font-size: 28px;
+    }
+
+    html, body {
+      background-color: #2c3e50;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><i class="fas fa-camera"></i> Security Cameras Map Barcelona</h1>
+  </header>
+
+  <div id="map"></div> 
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+  <script>
+   
+    var map = L.map('map').setView([41.4000, 2.1740], 12); 
+
+   
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      detectRetina: true
+    }).addTo(map);
+
+   
+    function cargarCamaras() {
+      
+      Papa.parse("cam.csv", {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        complete: function(results) {
+          
+          results.data.forEach(function(camara) {
+           
+            if (camara.Latitud && camara.Longitud) {
+              var lat = camara.Latitud;
+              var lon = camara.Longitud;
+
+           
+              if (camara.Tipus_Cam_Seguretat === "Móvil") {
+               
+                lat = 41.3851; 
+                lon = 2.1734;
+              }
+
+         
+              var cameraIcon = L.icon({
+                iconUrl: 'security.svg', 
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+              });
+
+             
+              L.marker([lat, lon], { icon: cameraIcon })
+                .addTo(map)
+                .bindPopup(`  
+                  <b>${camara.Nom_Barri}</b><br>
+                  Código de cámara: ${camara.Codi_Cam_Seguretat}<br>
+                  Tipo: ${camara.Tipus_Cam_Seguretat}<br>
+                  Número de cámara: ${camara.Num_Cam_Seguretat}<br>
+                  Distrito: ${camara.Nom_Districte}<br>
+                  Código de soporte: ${camara.Codi_Suport}<br>
+                  Fecha de alta: ${camara.Data_Alta}
+                `);
+            }
+          });
+        }
+      });
+    }
+
+    
+    cargarCamaras();
+  </script>
+</body>
+</html>
